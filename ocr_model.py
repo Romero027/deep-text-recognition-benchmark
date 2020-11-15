@@ -22,7 +22,7 @@ from modules.sequence_modeling import BidirectionalLSTM
 from modules.prediction import Attention
 
 
-class Model(nn.Module):
+class OCR_MODEL(nn.Module):
 
     def __init__(self, opt):
         super(Model, self).__init__()
