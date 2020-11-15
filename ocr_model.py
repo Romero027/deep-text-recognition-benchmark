@@ -38,9 +38,9 @@ class OCR_MODEL(nn.Module):
             print('No Transformation module specified')
 
         """ FeatureExtraction """
-        if self.cfg.OCR.OCRFEATURE_EXTRACTION == 'VGG':
+        if self.cfg.OCR.FEATURE_EXTRACTION == 'VGG':
             self.FeatureExtraction = VGG_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
-        elif sself.cfg.OCR.FEATURE_EXTRACTION == 'RCNN':
+        elif self.cfg.OCR.FEATURE_EXTRACTION == 'RCNN':
             self.FeatureExtraction = RCNN_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
         elif self.cfg.OCR.FEATURE_EXTRACTION == 'ResNet':
             self.FeatureExtraction = ResNet_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
