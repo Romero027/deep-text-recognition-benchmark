@@ -24,46 +24,46 @@ from modules.prediction import Attention
 
 class OCR_MODEL(nn.Module):
 
-    def __init__(self, opt):
-        super(Model, self).__init__()
-        self.opt = opt
-        self.stages = {'Trans': opt.Transformation, 'Feat': opt.FeatureExtraction,
-                       'Seq': opt.SequenceModeling, 'Pred': opt.Prediction}
+    def __init__(self, cfg):
+        super(OCR_MODEL, self).__init__()
+        self.cfg = cfg
+        self.stages = {'Trans': self.cfg.OCR.TRANSFORMATION, 'Feat': self.cfg.OCR.FEATURE_EXTRACTION,
+                       'Seq': self.cfg.OCR.SEQUENCE_MODELING, 'Pred': self.cfg.OCR.PREDICTION}
 
         """ Transformation """
-        if opt.Transformation == 'TPS':
-            self.Transformation = TPS_SpatialTransformerNetwork(
-                F=opt.num_fiducial, I_size=(opt.imgH, opt.imgW), I_r_size=(opt.imgH, opt.imgW), I_channel_num=opt.input_channel)
+        if self.cfg.OCR.TRANSFORMATION == 'TPS':
+            self.TRANSFORMATION = TPS_SpatialTransformerNetwork(
+                F=self.cfg.OCR.NUM_FIDUCIAL, I_size=(cfg.BASE.IMG_H, cfg.BASE.IMG_W), I_r_size=(cfg.BASE.IMG_H, cfg.BASE.IMG_W), I_channel_num=self.cfg.OCR.INPUT_CHANNEL)
         else:
             print('No Transformation module specified')
 
         """ FeatureExtraction """
-        if opt.FeatureExtraction == 'VGG':
-            self.FeatureExtraction = VGG_FeatureExtractor(opt.input_channel, opt.output_channel)
-        elif opt.FeatureExtraction == 'RCNN':
-            self.FeatureExtraction = RCNN_FeatureExtractor(opt.input_channel, opt.output_channel)
-        elif opt.FeatureExtraction == 'ResNet':
-            self.FeatureExtraction = ResNet_FeatureExtractor(opt.input_channel, opt.output_channel)
+        if self.cfg.OCR.OCRFEATURE_EXTRACTION == 'VGG':
+            self.FeatureExtraction = VGG_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
+        elif sself.cfg.OCR.FEATURE_EXTRACTION == 'RCNN':
+            self.FeatureExtraction = RCNN_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
+        elif self.cfg.OCR.FEATURE_EXTRACTION == 'ResNet':
+            self.FeatureExtraction = ResNet_FeatureExtractor(self.cfg.OCR.INPUT_CHANNEL, self.cfg.OCR.OUTPUT_CHANNEL)
         else:
             raise Exception('No FeatureExtraction module specified')
-        self.FeatureExtraction_output = opt.output_channel  # int(imgH/16-1) * 512
+        self.FeatureExtraction_output = self.cfg.OCR.INPUT_CHANNEL  # int(imgH/16-1) * 512
         self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((None, 1))  # Transform final (imgH/16-1) -> 1
 
         """ Sequence modeling"""
-        if opt.SequenceModeling == 'BiLSTM':
+        if self.cfg.OCR.SEQUENCE_MODELING == 'BiLSTM':
             self.SequenceModeling = nn.Sequential(
-                BidirectionalLSTM(self.FeatureExtraction_output, opt.hidden_size, opt.hidden_size),
-                BidirectionalLSTM(opt.hidden_size, opt.hidden_size, opt.hidden_size))
-            self.SequenceModeling_output = opt.hidden_size
+                BidirectionalLSTM(self.FeatureExtraction_output, self.cfg.OCR.HIDDEN_SIZE, self.cfg.OCR.HIDDEN_SIZE),
+                BidirectionalLSTM(self.cfg.OCR.HIDDEN_SIZE, self.cfg.OCR.HIDDEN_SIZE, self.cfg.OCR.HIDDEN_SIZE))
+            self.SequenceModeling_output = self.cfg.OCR.HIDDEN_SIZE
         else:
             print('No SequenceModeling module specified')
             self.SequenceModeling_output = self.FeatureExtraction_output
 
         """ Prediction """
-        if opt.Prediction == 'CTC':
-            self.Prediction = nn.Linear(self.SequenceModeling_output, opt.num_class)
-        elif opt.Prediction == 'Attn':
-            self.Prediction = Attention(self.SequenceModeling_output, opt.hidden_size, opt.num_class)
+        if self.cfg.OCR.PREDICTION == 'CTC':
+            self.Prediction = nn.Linear(self.SequenceModeling_output, self.cfg.OCR.NUM_CLASS)
+        elif self.cfg.OCR.PREDICTION == 'Attn':
+            self.Prediction = Attention(self.SequenceModeling_output, self.cfg.OCR.HIDDEN_SIZE, self.cfg.OCR.NUM_CLASS)
         else:
             raise Exception('Prediction is neither CTC or Attn')
 
@@ -87,6 +87,6 @@ class OCR_MODEL(nn.Module):
         if self.stages['Pred'] == 'CTC':
             prediction = self.Prediction(contextual_feature.contiguous())
         else:
-            prediction = self.Prediction(contextual_feature.contiguous(), text, is_train, batch_max_length=self.opt.batch_max_length)
+            prediction = self.Prediction(contextual_feature.contiguous(), text, is_train, batch_max_length=self.cfg.OCR.BATCH_MAX_LENGTH)
 
         return prediction
