@@ -218,8 +218,8 @@ class LmdbDataset(Dataset):
 
 class RawDataset(Dataset):
 
-    def __init__(self, root, opt):
-        self.opt = opt
+    def __init__(self, root, cfg):
+        self.cfg = cfg
         self.image_path_list = []
         for dirpath, dirnames, filenames in os.walk(root):
             for name in filenames:
@@ -237,7 +237,7 @@ class RawDataset(Dataset):
     def __getitem__(self, index):
 
         try:
-            if self.opt.rgb:
+            if self.cfg.OCR.RGB:
                 img = Image.open(self.image_path_list[index]).convert('RGB')  # for color image
             else:
                 img = Image.open(self.image_path_list[index]).convert('L')
@@ -245,10 +245,10 @@ class RawDataset(Dataset):
         except IOError:
             print(f'Corrupted image for {index}')
             # make dummy image and dummy label for corrupted image.
-            if self.opt.rgb:
-                img = Image.new('RGB', (self.opt.imgW, self.opt.imgH))
+            if self.cfg.OCR.RGB:
+                img = Image.new('RGB', (self.cfg.OCR.W, self.cfg.OCR.H))
             else:
-                img = Image.new('L', (self.opt.imgW, self.opt.imgH))
+                img = Image.new('L', (self.cfg.OCR.W, self.cfg.OCR.H))
 
         return (img, self.image_path_list[index])
 
