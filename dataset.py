@@ -246,9 +246,9 @@ class RawDataset(Dataset):
             print(f'Corrupted image for {index}')
             # make dummy image and dummy label for corrupted image.
             if self.cfg.OCR.RGB:
-                img = Image.new('RGB', (self.cfg.OCR.W, self.cfg.OCR.H))
+                img = Image.new('RGB', (self.cfg.BASE.IMG_W, self.cfg.BASE.IMG_H))
             else:
-                img = Image.new('L', (self.cfg.OCR.W, self.cfg.OCR.H))
+                img = Image.new('L', (self.cfg.BASE.IMG_W, self.cfg.BASE.IMG_H))
 
         return (img, self.image_path_list[index])
 
