@@ -32,7 +32,7 @@ class OCR_MODEL(nn.Module):
 
         """ Transformation """
         if self.cfg.OCR.TRANSFORMATION == 'TPS':
-            self.TRANSFORMATION = TPS_SpatialTransformerNetwork(
+            self.Transformation = TPS_SpatialTransformerNetwork(
                 F=self.cfg.OCR.NUM_FIDUCIAL, I_size=(cfg.BASE.IMG_H, cfg.BASE.IMG_W), I_r_size=(cfg.BASE.IMG_H, cfg.BASE.IMG_W), I_channel_num=self.cfg.OCR.INPUT_CHANNEL)
         else:
             print('No Transformation module specified')
